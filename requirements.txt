@@ -1,0 +1,5 @@
+beautifulsoup4==4.11.1
+fake_useragent==2.0.3
+Flask==1.1.2
+Flask==2.2.3
+Requests==2.32.3

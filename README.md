@@ -4,6 +4,17 @@ A web-based tool to crawl citation data from Google Scholar and export it as a C
 ![](image.png)
 
 
+## Installation
+1. Clone the Repository
+```bash
+git clone https://github.com/Yuqin-G/scholar_crawler.git
+```
+2. Install Dependencies
+```bash
+cd scholar_crawler
+pip install -r requirements.txt
+```
+
 ## Usage
 1. Run the Application
    ```bash
