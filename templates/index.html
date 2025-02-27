@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scholar Citation Crawler</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Scholar Citation Crawler</h1>
+        
+        <form id="crawlForm">
+            <div class="form-group">
+                <label for="url">Google Scholar Citation URL:</label>
+                <input type="text" id="url" name="url" required 
+                    placeholder="e.g., https://scholar.google.com/scholar?cites=...">
+            </div>
+            <div class="form-group">
+                <label for="proxy">Proxy (optional):</label>
+                <input type="text" id="proxy" name="proxy" 
+                    placeholder="e.g., http://127.0.0.1:7890">
+            </div>
+            <button type="submit">Start Crawling</button>
+        </form>
+
+        <div id="loading" style="display: none;">Crawling... Please wait</div>
+        <div id="result" style="display: none;">
+            <h2>Results</h2>
+            <p>Original Paper: <span id="original-title"></span></p>
+            <p>Total Citations Found: <span id="count"></span></p>
+            <p>Preview (First 5 citations):</p>
+            <ul id="preview"></ul>
+            <a id="download-link" href="#" download>Download Full CSV</a>
+        </div>
+        <div id="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('crawlForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            error.style.display = 'none';
+
+            const formData = new FormData(form);
+            try {
+                const response = await fetch('/crawl', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                loading.style.display = 'none';
+                if (data.success) {
+                    result.style.display = 'block';
+                    document.getElementById('original-title').textContent = data.title;
+                    document.getElementById('count').textContent = data.count;
+                    
+                    const previewList = document.getElementById('preview');
+                    previewList.innerHTML = '';
+                    data.preview.forEach(paper => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<strong>${paper.title}</strong><br>${paper.info}<br><a href="${paper.link}" target="_blank">${paper.link}</a>`;
+                        previewList.appendChild(li);
+                    });
+
+                    document.getElementById('download-link').href = `/download/${data.filename}`;
+                    document.getElementById('download-link').textContent = `Download ${data.filename}`;
+                } else {
+                    error.style.display = 'block';
+                    error.textContent = `Error: ${data.error}`;
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = `Error: ${err.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
